@@ -12,12 +12,12 @@ if __name__ == "__main__":
 
     scl = preprocessing.StandardScaler()
     pca = decomposition.PCA()
-    rf_classifier = ensemble.RandomForestClassifier(n_jobs=-1)
+    rf = ensemble.RandomForestClassifier(n_jobs=-1)
 
     classifier = pipeline.Pipeline([
         ("scaling", scl),
         ("pca", pca),
-        ("random_forest", rf_classifier)
+        ("rf", rf)
     ])
 
     hyper_params_for_grid_search = {
@@ -30,6 +30,12 @@ if __name__ == "__main__":
         "max_depth": np.arange(1,20),
         "criterion": ["gini", "entropy"]
     }
+    hyper_params_for_pipeline_classifier = {
+        "pca__n_components": np.arange(5,10),
+        "rf__n_estimators": np.arange(100, 1500, 100),
+        "rf__max_depth": np.arange(1,20),
+        "rf__criterion": ["gini", "entropy"]
+    }
 
     # model = model_selection.GridSearchCV(
     #     estimator=classifier, 
@@ -40,8 +46,8 @@ if __name__ == "__main__":
     #     scoring="accuracy"
     # )
     model = model_selection.RandomizedSearchCV(
-        estimator = rf_classifier,
-        param_distributions=hyper_params_for_randomised_search,
+        estimator = classifier,
+        param_distributions=hyper_params_for_pipeline_classifier,
         n_iter=10,
         n_jobs=1,
         verbose=10,
